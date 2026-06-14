@@ -114,18 +114,20 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
                                     </div>
                                     
                                     {/* Chat Bubble */}
-                                    <motion.div 
-                                        initial={{ opacity: 0, y: 10, scale: 0.8 }}
-                                        animate={{ 
-                                            opacity: i === currentSpeakerIdx ? 1 : 0, 
-                                            y: i === currentSpeakerIdx ? 0 : 10, 
-                                            scale: i === currentSpeakerIdx ? 1 : 0.8 
-                                        }} 
-                                        transition={{ duration: 0.4, type: 'spring' }}
-                                        className="absolute bottom-[240px] md:bottom-auto md:-top-36 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:-right-8 bg-white text-slate-900 px-4 py-2 rounded-2xl rounded-b-sm md:rounded-bl-sm text-sm font-bold shadow-2xl z-40 w-max max-w-[280px] text-center md:text-left md:max-w-[240px]"
-                                    >
-                                        {currentMessage}
-                                    </motion.div>
+                                    <div className="absolute bottom-[240px] md:bottom-auto md:-top-36 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:-right-8 z-40 pointer-events-none w-[280px] md:w-[240px] flex justify-center md:justify-end">
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                                            animate={{ 
+                                                opacity: i === currentSpeakerIdx ? 1 : 0, 
+                                                y: i === currentSpeakerIdx ? 0 : 10, 
+                                                scale: i === currentSpeakerIdx ? 1 : 0.8 
+                                            }} 
+                                            transition={{ duration: 0.4, type: 'spring' }}
+                                            className="bg-white text-slate-900 px-4 py-2 rounded-2xl rounded-b-sm md:rounded-bl-sm text-sm font-bold shadow-2xl w-max max-w-[280px] text-center md:text-left md:max-w-[240px] pointer-events-auto"
+                                        >
+                                            {currentMessage}
+                                        </motion.div>
+                                    </div>
 
                                     {/* Character Behind Desk */}
                                     <div className="absolute bottom-20 flex flex-col items-center z-10">

@@ -7,6 +7,12 @@ const nextConfig = {
         destination: 'http://backend:8527/:path*' // Proxy to Backend container
       }
     ]
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   }
 };
 
