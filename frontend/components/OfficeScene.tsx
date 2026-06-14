@@ -98,7 +98,7 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
             </div>
 
             {/* IT Desks Floor Area */}
-            <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-b from-slate-800 to-slate-900 border-t-4 border-slate-700 flex justify-evenly items-end px-4 pb-8">
+            <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-b from-slate-800 to-slate-900 border-t-4 border-slate-700 flex justify-evenly items-end px-4 pb-16">
                 
                 {/* Render Members or Empty Desks */}
                 {[0, 1, 2].map((i) => {
