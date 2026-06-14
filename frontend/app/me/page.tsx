@@ -33,10 +33,10 @@ export default function MemberPage() {
 
     return (
         <div className="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-end">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h1 className="text-4xl font-space font-bold text-white mb-2">My Space</h1>
-                    <p className="text-slate-400">View your history and take a break</p>
+                    <h1 className="text-3xl sm:text-4xl font-space font-bold text-white mb-2">My Space</h1>
+                    <p className="text-slate-400 text-sm sm:text-base">View your history and take a break</p>
                 </div>
             </motion.div>
 

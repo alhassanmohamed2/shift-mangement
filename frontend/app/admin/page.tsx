@@ -23,10 +23,10 @@ export default function AdminPage() {
 
     return (
         <div className="flex-grow p-4 md:p-8 max-w-7xl mx-auto w-full space-y-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-end">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h1 className="text-4xl font-space font-bold text-white mb-2">Admin Panel</h1>
-                    <p className="text-slate-400">Manage team and assignments</p>
+                    <h1 className="text-3xl sm:text-4xl font-space font-bold text-white mb-2">Admin Panel</h1>
+                    <p className="text-slate-400 text-sm sm:text-base">Manage team and assignments</p>
                 </div>
             </motion.div>
 

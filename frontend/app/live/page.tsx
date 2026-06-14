@@ -39,12 +39,12 @@ export default function LivePage() {
 
     return (
         <div className="flex-grow p-4 md:p-8 max-w-6xl mx-auto w-full space-y-8">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-end">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h1 className="text-4xl font-space font-bold text-white mb-2">Live Status</h1>
-                    <p className="text-slate-400">Current shift: <span className="text-indigo-400 font-bold uppercase">{currentType}</span></p>
+                    <h1 className="text-3xl sm:text-4xl font-space font-bold text-white mb-2">Live Status</h1>
+                    <p className="text-slate-400 text-sm sm:text-base">Current shift: <span className="text-indigo-400 font-bold uppercase">{currentType}</span></p>
                 </div>
-                <div className="text-2xl font-mono text-slate-300 bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 shadow-inner">
+                <div className="text-xl sm:text-2xl font-mono text-slate-300 bg-slate-800 px-4 py-2 rounded-lg border border-slate-700 shadow-inner w-full sm:w-auto text-center">
                     {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
             </motion.div>

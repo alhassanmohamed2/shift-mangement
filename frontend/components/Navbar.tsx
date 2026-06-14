@@ -19,8 +19,8 @@ export default function Navbar() {
         <nav className="border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
-                    <div className="flex items-center gap-8">
-                        <Link href="/live" className="text-xl font-space font-bold text-indigo-400">
+                    <div className="flex items-center gap-4 sm:gap-8 overflow-hidden w-full">
+                        <Link href="/live" className="text-xl font-space font-bold text-indigo-400 shrink-0">
                             Shifts
                         </Link>
                         <div className="flex overflow-x-auto space-x-2 scrollbar-hide py-1 max-w-[60vw]">
@@ -46,7 +46,7 @@ export default function Navbar() {
                             )}
                         </div>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 shrink-0">
                         <button onClick={() => setShowProfileModal(true)} className="text-sm font-medium text-slate-300 hidden sm:block hover:text-white transition-colors">
                             {user.sub}
                         </button>
