@@ -28,6 +28,15 @@ export default function LivePage() {
             });
     }, []);
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            api.get('/shifts/current')
+                .then(res => setShifts(res.data))
+                .catch(() => {}); // silently ignore refresh errors
+        }, 30000);
+        return () => clearInterval(interval);
+    }, []);
+
     if (loading) return <div className="flex-grow flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div></div>;
 
     const currentHour = currentTime.getHours();

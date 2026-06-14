@@ -1,10 +1,11 @@
 'use client';
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export default function OfficeScene({ members, shiftType }: { members: any[], shiftType: string }) {
     const [time, setTime] = useState(new Date());
     const [chatStep, setChatStep] = useState(0);
+    const serverDelays = useMemo(() => Array.from({length: 6}, () => [Math.random() * 2, Math.random() * 2]), []);
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
@@ -227,12 +228,12 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
                                     <div key={j} className="w-full h-4 bg-slate-800 rounded border border-slate-700 flex items-center px-1 gap-1">
                                         <motion.div 
                                             animate={{ opacity: [1, 0.2, 1] }} 
-                                            transition={{ duration: 0.5, delay: Math.random() * 2, repeat: Infinity }}
+                                            transition={{ duration: 0.5, delay: serverDelays[j][0], repeat: Infinity }}
                                             className="w-1 h-1 bg-emerald-500 rounded-full" 
                                         />
                                         <motion.div 
                                             animate={{ opacity: [1, 0.2, 1] }} 
-                                            transition={{ duration: 1, delay: Math.random() * 2, repeat: Infinity }}
+                                            transition={{ duration: 1, delay: serverDelays[j][1], repeat: Infinity }}
                                             className="w-1 h-1 bg-blue-500 rounded-full" 
                                         />
                                     </div>

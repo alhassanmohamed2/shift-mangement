@@ -5,7 +5,7 @@ import MemberAvatar from '@/components/MemberAvatar';
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '@/lib/auth';
-import { AlertTriangle, Plus, X } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 export default function SchedulePage() {
     const { user } = useAuth();
@@ -48,7 +48,29 @@ export default function SchedulePage() {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex justify-between items-end">
                 <div>
                     <h1 className="text-4xl font-space font-bold text-white mb-2">Weekly Schedule</h1>
-                    <p className="text-slate-400">Week of {startDate}</p>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => {
+                                const d = new Date(startDate);
+                                d.setDate(d.getDate() - 7);
+                                setStartDate(d.toISOString().split('T')[0]);
+                            }}
+                            className="p-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                        >
+                            <ChevronLeft size={18} />
+                        </button>
+                        <p className="text-slate-400">Week of {startDate}</p>
+                        <button
+                            onClick={() => {
+                                const d = new Date(startDate);
+                                d.setDate(d.getDate() + 7);
+                                setStartDate(d.toISOString().split('T')[0]);
+                            }}
+                            className="p-1.5 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                        >
+                            <ChevronRight size={18} />
+                        </button>
+                    </div>
                 </div>
             </motion.div>
 

@@ -3,14 +3,17 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
-import { format } from 'date-fns';
+
+const PAGE_LIMIT = 50;
 
 export default function LogsPage() {
     const [logs, setLogs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
 
     useEffect(() => {
-        api.get('/logs?page=1&limit=50')
+        setLoading(true);
+        api.get(`/logs?page=${page}&limit=${PAGE_LIMIT}`)
             .then(res => {
                 setLogs(res.data.logs);
                 setLoading(false);
@@ -19,7 +22,7 @@ export default function LogsPage() {
                 toast.error('Failed to load logs');
                 setLoading(false);
             });
-    }, []);
+    }, [page]);
 
     if (loading) return <div className="flex-grow flex items-center justify-center"><div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div></div>;
 
@@ -78,6 +81,24 @@ export default function LogsPage() {
                         )}
                     </tbody>
                 </table>
+            </div>
+
+            <div className="flex items-center justify-center gap-4">
+                <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="px-4 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 font-medium text-sm hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    ← Previous
+                </button>
+                <span className="text-slate-400 text-sm">Page {page}</span>
+                <button
+                    onClick={() => setPage(p => p + 1)}
+                    disabled={logs.length < PAGE_LIMIT}
+                    className="px-4 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-300 font-medium text-sm hover:bg-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Next →
+                </button>
             </div>
         </div>
     );

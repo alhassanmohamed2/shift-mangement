@@ -285,6 +285,7 @@ function ShiftsTab({ initialDate }: { initialDate?: string | null }) {
     });
     const [shifts, setShifts] = useState<any[]>([]);
     const [members, setMembers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         api.get('/users').then(res => setMembers(res.data));
@@ -295,22 +296,28 @@ function ShiftsTab({ initialDate }: { initialDate?: string | null }) {
     }, [selectedDate]);
 
     const handleAssign = async (shiftId: number, userId: number) => {
+        setLoading(true);
         try {
             await api.post(`/shifts/${shiftId}/assign?user_id=${userId}`);
             toast.success('Assigned successfully');
             api.get(`/shifts/week?start=${selectedDate}`).then(res => setShifts(res.data.filter((s: any) => s.date === selectedDate)));
         } catch (error: any) {
             toast.error(error.response?.data?.detail || 'Failed to assign');
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleRemove = async (shiftId: number, userId: number) => {
+        setLoading(true);
         try {
             await api.delete(`/shifts/${shiftId}/assign/${userId}`);
             toast.success('Removed successfully');
             api.get(`/shifts/week?start=${selectedDate}`).then(res => setShifts(res.data.filter((s: any) => s.date === selectedDate)));
         } catch (error: any) {
             toast.error(error.response?.data?.detail || 'Failed to remove');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -328,16 +335,20 @@ function ShiftsTab({ initialDate }: { initialDate?: string | null }) {
                     />
                     <div className="flex flex-col gap-2">
                         <button
+                            disabled={loading}
                             onClick={async () => {
+                                setLoading(true);
                                 try {
                                     await api.post(`/shifts/auto-assign?start_date=${selectedDate}`);
                                     toast.success('Week auto-assigned successfully!');
                                     api.get(`/shifts/week?start=${selectedDate}`).then(res => setShifts(res.data.filter((s: any) => s.date === selectedDate)));
                                 } catch (error: any) {
                                     toast.error(error.response?.data?.detail || 'Failed to auto-assign');
+                                } finally {
+                                    setLoading(false);
                                 }
                             }}
-                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition-colors flex items-center justify-center gap-2"
+                            className={`w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition-colors flex items-center justify-center gap-2 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             <CalendarIcon size={18} /> Auto-Assign Week
                         </button>
@@ -419,6 +430,7 @@ function ShiftsTab({ initialDate }: { initialDate?: string | null }) {
                                         ))}
                                     </select>
                                     <button 
+                                        disabled={loading}
                                         onClick={() => {
                                             const val = (document.getElementById(`select-${shift.id}`) as HTMLSelectElement).value;
                                             if (val) {
@@ -426,7 +438,7 @@ function ShiftsTab({ initialDate }: { initialDate?: string | null }) {
                                                 (document.getElementById(`select-${shift.id}`) as HTMLSelectElement).value = "";
                                             }
                                         }}
-                                        className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition-colors shrink-0"
+                                        className={`w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition-colors shrink-0 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                     >
                                         Assign
                                     </button>
