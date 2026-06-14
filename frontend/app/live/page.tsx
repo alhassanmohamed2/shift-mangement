@@ -63,7 +63,7 @@ export default function LivePage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 + i * 0.1 }}
-                            className={`p-6 rounded-2xl border ${isActive ? 'bg-indigo-900/20 border-indigo-500/50 shadow-[0_0_30px_rgba(99,102,241,0.15)]' : 'bg-slate-800/50 border-slate-700'} relative overflow-hidden`}
+                            className={`p-6 rounded-2xl border ${isActive ? 'bg-indigo-900/20 border-indigo-500/50 shadow-[0_0_30px_rgba(99,102,241,0.15)]' : 'bg-slate-800/50 border-slate-700'}`}
                         >
                             <h3 className="text-lg font-space font-bold uppercase text-slate-300 mb-4 flex items-center gap-2">
                                 {type === 'morning' ? '🌅' : type === 'evening' ? '🌇' : '🌙'} {type}
