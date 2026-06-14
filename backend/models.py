@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum, DateTime, ForeignKey, Date, Text
+from sqlalchemy import Column, Integer, String, Enum, DateTime, ForeignKey, Date, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 import enum
 from datetime import datetime, timezone
@@ -33,6 +33,7 @@ class User(Base):
 
 class Shift(Base):
     __tablename__ = "shifts"
+    __table_args__ = (UniqueConstraint('shift_type', 'date', name='uq_shift_type_date'),)
     id = Column(Integer, primary_key=True, index=True)
     shift_type = Column(Enum(ShiftTypeEnum), nullable=False)
     date = Column(Date, nullable=False)
@@ -43,10 +44,11 @@ class Shift(Base):
 
 class ShiftAssignment(Base):
     __tablename__ = "shift_assignments"
+    __table_args__ = (UniqueConstraint('shift_id', 'user_id', name='uq_shift_user'),)
     id = Column(Integer, primary_key=True, index=True)
-    shift_id = Column(Integer, ForeignKey("shifts.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
-    assigned_by = Column(Integer, ForeignKey("users.id"))
+    shift_id = Column(Integer, ForeignKey("shifts.id", ondelete="CASCADE"), index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    assigned_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     assigned_at = Column(DateTime, default=get_utc_now)
     
     shift = relationship("Shift", back_populates="assignments")
@@ -56,10 +58,10 @@ class ShiftAssignment(Base):
 class ShiftLog(Base):
     __tablename__ = "shift_logs"
     id = Column(Integer, primary_key=True, index=True)
-    shift_id = Column(Integer, ForeignKey("shifts.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
+    shift_id = Column(Integer, ForeignKey("shifts.id", ondelete="CASCADE"), index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True)
     action = Column(Enum(ActionEnum), nullable=False)
-    performed_by = Column(Integer, ForeignKey("users.id"))
+    performed_by = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     timestamp = Column(DateTime, default=get_utc_now)
     notes = Column(Text, nullable=True)
 

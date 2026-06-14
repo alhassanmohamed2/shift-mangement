@@ -21,8 +21,8 @@ def seed():
             db.add(admin)
             print("Admin account created.")
         else:
-            admin.hashed_password = get_password_hash(admin_password)
-            print("Admin account password updated.")
+            print("Admin user already exists, skipping.")
+            return
         
         db.commit()
     finally:

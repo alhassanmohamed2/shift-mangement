@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 from datetime import date, timedelta
 import models, schemas
@@ -8,11 +8,15 @@ from sqlalchemy import func
 
 router = APIRouter()
 
-def get_or_create_shift(db: Session, shift_type: models.ShiftTypeEnum, shift_date: date):
-    shift = db.query(models.Shift).filter(
+def get_shift(db: Session, shift_type: models.ShiftTypeEnum, shift_date: date):
+    """Read-only: returns the shift or None. Does NOT create."""
+    return db.query(models.Shift).filter(
         models.Shift.shift_type == shift_type,
         models.Shift.date == shift_date
     ).first()
+
+def get_or_create_shift(db: Session, shift_type: models.ShiftTypeEnum, shift_date: date):
+    shift = get_shift(db, shift_type, shift_date)
     if not shift:
         shift = models.Shift(shift_type=shift_type, date=shift_date)
         db.add(shift)
@@ -23,32 +27,41 @@ def get_or_create_shift(db: Session, shift_type: models.ShiftTypeEnum, shift_dat
 @router.get("/current", response_model=List[schemas.ShiftResponse])
 def get_current_shifts(db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
     today = date.today()
-    shifts = []
-    for stype in models.ShiftTypeEnum:
-        shifts.append(get_or_create_shift(db, stype, today))
+    shifts = db.query(models.Shift).options(joinedload(models.Shift.assignments)).filter(
+        models.Shift.date == today
+    ).all()
     return shifts
 
 @router.get("/week", response_model=List[schemas.ShiftResponse])
 def get_week_shifts(start: date, db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
-    shifts = []
-    for i in range(7):
-        current_date = start + timedelta(days=i)
-        for stype in models.ShiftTypeEnum:
-            shifts.append(get_or_create_shift(db, stype, current_date))
+    end = start + timedelta(days=7)
+    shifts = db.query(models.Shift).options(joinedload(models.Shift.assignments)).filter(
+        models.Shift.date >= start,
+        models.Shift.date < end
+    ).order_by(models.Shift.date, models.Shift.shift_type).all()
     return shifts
 
 @router.get("/dashboard")
 def get_dashboard(db: Session = Depends(get_db), admin: models.User = Depends(get_current_admin)):
     members = db.query(models.User).filter(models.User.role == models.RoleEnum.member).all()
+    # Eager-load shifts via joinedload to avoid N+1 queries
+    all_assignments = (
+        db.query(models.ShiftAssignment)
+        .options(joinedload(models.ShiftAssignment.shift))
+        .filter(models.ShiftAssignment.user_id.in_([m.id for m in members]))
+        .all()
+    )
+    # Group by user_id
+    assignments_by_user: dict[int, list] = {}
+    for a in all_assignments:
+        assignments_by_user.setdefault(a.user_id, []).append(a)
     dashboard = []
     for m in members:
-        assignments = db.query(models.ShiftAssignment).filter(models.ShiftAssignment.user_id == m.id).all()
         counts = {'morning': 0, 'evening': 0, 'night': 0}
         total = 0
-        for a in assignments:
-            shift = db.query(models.Shift).filter(models.Shift.id == a.shift_id).first()
-            if shift:
-                counts[shift.shift_type.value] += 1
+        for a in assignments_by_user.get(m.id, []):
+            if a.shift:
+                counts[a.shift.shift_type.value] += 1
                 total += 1
         dashboard.append({
             "user": schemas.UserResponse.from_orm(m),
@@ -127,15 +140,19 @@ def auto_assign(start_date: date, db: Session = Depends(get_db), admin: models.U
     if len(members) < 2:
         raise HTTPException(status_code=400, detail="Not enough members to assign shifts. Minimum 2 needed.")
     
-    # 1. Gather historical preferences based on assignments
+    # 1. Gather historical preferences based on assignments (single query with joinedload)
+    all_assignments = (
+        db.query(models.ShiftAssignment)
+        .options(joinedload(models.ShiftAssignment.shift))
+        .filter(models.ShiftAssignment.user_id.in_([m.id for m in members]))
+        .all()
+    )
     member_preferences = {}
     for m in members:
-        assignments = db.query(models.ShiftAssignment).filter(models.ShiftAssignment.user_id == m.id).all()
         counts = {models.ShiftTypeEnum.morning: 0, models.ShiftTypeEnum.evening: 0, models.ShiftTypeEnum.night: 0}
-        for a in assignments:
-            shift = db.query(models.Shift).filter(models.Shift.id == a.shift_id).first()
-            if shift:
-                counts[shift.shift_type] += 1
+        for a in all_assignments:
+            if a.user_id == m.id and a.shift:
+                counts[a.shift.shift_type] += 1
         best_shift = max(counts, key=counts.get)
         member_preferences[m.id] = best_shift if counts[best_shift] > 0 else models.ShiftTypeEnum.morning
     
