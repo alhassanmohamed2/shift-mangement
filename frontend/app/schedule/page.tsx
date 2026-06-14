@@ -6,9 +6,10 @@ import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useAuth } from '@/lib/auth';
 import { AlertTriangle, Plus, X } from 'lucide-react';
-
+import { useRouter } from 'next/navigation';
 export default function SchedulePage() {
     const { user } = useAuth();
+    const router = useRouter();
     const [shifts, setShifts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [startDate, setStartDate] = useState(() => {
@@ -95,7 +96,10 @@ export default function SchedulePage() {
                                                     </div>
                                                 )}
                                                 {user?.role === 'admin' && (
-                                                    <button className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center justify-center gap-1 bg-indigo-500/10 py-1 rounded hover:bg-indigo-500/20 transition-colors">
+                                                    <button 
+                                                        onClick={() => router.push(`/admin?tab=shifts&date=${day}`)}
+                                                        className="mt-2 text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center justify-center gap-1 bg-indigo-500/10 py-1 rounded hover:bg-indigo-500/20 transition-colors"
+                                                    >
                                                         Edit
                                                     </button>
                                                 )}

@@ -2,16 +2,20 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import MemberAvatar from '@/components/MemberAvatar';
 import { Users, Calendar as CalendarIcon, UserPlus, X } from 'lucide-react';
 
-export default function AdminPage() {
+function AdminContent() {
     const { user, loading } = useAuth();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'shifts'>('dashboard');
+    const searchParams = useSearchParams();
+    const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'shifts'>(
+        (searchParams.get('tab') as any) || 'dashboard'
+    );
     
     useEffect(() => {
         if (!loading && user?.role !== 'admin') {
@@ -52,12 +56,12 @@ export default function AdminPage() {
             </div>
 
             <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-            >
-                {activeTab === 'dashboard' ? <DashboardTab /> : activeTab === 'members' ? <MembersTab /> : <ShiftsTab />}
-            </motion.div>
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+        >
+            {activeTab === 'dashboard' ? <DashboardTab /> : activeTab === 'members' ? <MembersTab /> : <ShiftsTab initialDate={searchParams.get('date')} />}
+        </motion.div>
         </div>
     );
 }
@@ -275,9 +279,9 @@ function MembersTab() {
     );
 }
 
-function ShiftsTab() {
+function ShiftsTab({ initialDate }: { initialDate?: string | null }) {
     const [selectedDate, setSelectedDate] = useState(() => {
-        return new Date().toISOString().split('T')[0];
+        return initialDate || new Date().toISOString().split('T')[0];
     });
     const [shifts, setShifts] = useState<any[]>([]);
     const [members, setMembers] = useState<any[]>([]);
@@ -433,5 +437,13 @@ function ShiftsTab() {
                 })}
             </div>
         </div>
+    );
+}
+
+export default function AdminPage() {
+    return (
+        <Suspense fallback={<div className="p-8 text-center text-white">Loading...</div>}>
+            <AdminContent />
+        </Suspense>
     );
 }
