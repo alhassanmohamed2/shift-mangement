@@ -66,45 +66,45 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
     ];
 
     return (
-        <div className={`relative w-full h-[450px] rounded-3xl border border-slate-700/50 ${ambientColor} transition-colors duration-1000 shadow-2xl overflow-x-auto overflow-y-hidden`}>
-            <div className="min-w-[800px] w-full h-full relative">
+        <div className={`relative w-full rounded-3xl border border-slate-700/50 ${ambientColor} transition-colors duration-1000 shadow-2xl overflow-hidden flex flex-col md:h-[450px]`}>
+            <div className="w-full h-full relative flex flex-col md:block">
             {/* Huge Window */}
-            <div className={`absolute top-4 left-4 right-4 h-48 bg-gradient-to-b ${windowColor} rounded-t-2xl rounded-b-sm ${lightGlow} transition-colors duration-1000 opacity-80 overflow-hidden border-8 border-slate-800`}>
+            <div className={`absolute top-4 left-4 right-4 h-32 md:h-48 bg-gradient-to-b ${windowColor} rounded-t-2xl rounded-b-sm ${lightGlow} transition-colors duration-1000 opacity-80 overflow-hidden border-4 md:border-8 border-slate-800`}>
                 {/* Sun / Moon based on time */}
                 <motion.div 
-                    className={`absolute rounded-full blur-[2px] ${isMorning ? 'bg-amber-300 w-16 h-16' : isEvening ? 'bg-orange-400 w-12 h-12' : 'bg-slate-200 w-10 h-10'}`}
+                    className={`absolute rounded-full blur-[2px] ${isMorning ? 'bg-amber-300 w-12 h-12 md:w-16 md:h-16' : isEvening ? 'bg-orange-400 w-10 h-10 md:w-12 md:h-12' : 'bg-slate-200 w-8 h-8 md:w-10 md:h-10'}`}
                     style={{ 
                         top: isMorning ? '20%' : isEvening ? '60%' : '20%', 
                         left: isMorning ? '20%' : isEvening ? '70%' : '80%' 
                     }}
                 />
                 {/* Window frames */}
-                <div className="absolute top-0 bottom-0 left-1/3 w-2 bg-slate-800" />
-                <div className="absolute top-0 bottom-0 left-2/3 w-2 bg-slate-800" />
-                <div className="absolute top-1/2 left-0 right-0 h-2 bg-slate-800" />
+                <div className="absolute top-0 bottom-0 left-1/3 w-1 md:w-2 bg-slate-800" />
+                <div className="absolute top-0 bottom-0 left-2/3 w-1 md:w-2 bg-slate-800" />
+                <div className="absolute top-1/2 left-0 right-0 h-1 md:h-2 bg-slate-800" />
             </div>
 
             {/* Wall Clock */}
-            <div className="absolute top-8 right-12 w-16 h-16 rounded-full border-4 border-slate-700 bg-slate-800 flex items-center justify-center shadow-2xl z-10">
+            <div className="absolute top-6 right-6 md:top-8 md:right-12 w-12 h-12 md:w-16 md:h-16 rounded-full border-2 md:border-4 border-slate-700 bg-slate-800 flex items-center justify-center shadow-2xl z-10">
                 <div 
-                    className="absolute w-1 h-6 bg-rose-500 rounded-full origin-bottom"
+                    className="absolute w-0.5 md:w-1 h-4 md:h-6 bg-rose-500 rounded-full origin-bottom"
                     style={{ transform: `translateY(-50%) rotate(${time.getHours() * 30 + time.getMinutes() / 2}deg)` }}
                 />
                 <div 
-                    className="absolute w-0.5 h-8 bg-slate-300 rounded-full origin-bottom"
+                    className="absolute w-px md:w-0.5 h-5 md:h-8 bg-slate-300 rounded-full origin-bottom"
                     style={{ transform: `translateY(-50%) rotate(${time.getMinutes() * 6}deg)` }}
                 />
-                <div className="w-2 h-2 rounded-full bg-white z-10" />
+                <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-white z-10" />
             </div>
 
             {/* IT Desks Floor Area */}
-            <div className="absolute bottom-0 w-full h-1/2 bg-gradient-to-b from-slate-800 to-slate-900 border-t-4 border-slate-700 flex justify-evenly items-end px-4 pb-16">
+            <div className="relative md:absolute bottom-0 w-full md:h-1/2 bg-gradient-to-b from-transparent via-slate-800/80 to-slate-900 border-t-4 border-slate-700 flex flex-col md:flex-row justify-evenly items-center md:items-end px-4 pt-48 md:pt-0 pb-16 gap-32 md:gap-4 mt-auto">
                 
                 {/* Render Members or Empty Desks */}
                 {[0, 1, 2].map((i) => {
                     const member = members[i];
                     return (
-                        <div key={i} className="relative w-48 h-48 flex flex-col items-center justify-end">
+                        <div key={i} className="relative w-48 h-48 shrink-0 flex flex-col items-center justify-end">
                             {member ? (
                                 <>
                                     {/* Name Tag */}
@@ -122,7 +122,7 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
                                             scale: i === currentSpeakerIdx ? 1 : 0.8 
                                         }} 
                                         transition={{ duration: 0.4, type: 'spring' }}
-                                        className="absolute -top-36 -right-8 bg-white text-slate-900 px-4 py-2 rounded-2xl rounded-bl-sm text-sm font-bold shadow-2xl z-40 max-w-[220px]"
+                                        className="absolute -top-36 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:-right-8 bg-white text-slate-900 px-4 py-2 rounded-2xl rounded-bl-sm text-sm font-bold shadow-2xl z-40 w-[200px] md:max-w-[220px]"
                                     >
                                         {currentMessage}
                                     </motion.div>

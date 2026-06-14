@@ -120,58 +120,81 @@ export default function SnakeGame() {
     return (
         <div 
             ref={gameRef}
-            className="flex flex-col items-center outline-none focus:ring-4 focus:ring-indigo-500/50 rounded-xl p-2 transition-shadow" 
+            className="flex flex-col items-center outline-none focus:ring-4 focus:ring-indigo-500/50 rounded-xl p-2 md:p-4 transition-shadow w-full max-w-[400px] mx-auto" 
             tabIndex={0} 
             onKeyDown={handleKeyDown}
         >
-            <div className="flex justify-between w-full max-w-[400px] mb-4 text-slate-300 font-mono text-lg px-2">
+            <div className="flex justify-between w-full mb-4 text-slate-300 font-mono text-base md:text-lg px-2">
                 <span>Score: {score}</span>
                 <span>High Score: {highScore}</span>
             </div>
             
-            <div className="relative bg-slate-900 border-4 border-slate-700 rounded-lg overflow-hidden shadow-2xl" 
-                 style={{ width: GRID_SIZE * 20, height: GRID_SIZE * 20 }}>
+            <div className="relative bg-slate-900 border-4 border-slate-700 rounded-lg overflow-hidden shadow-2xl w-full aspect-square touch-none">
                  
                 {/* Grid */}
-                <div className="absolute inset-0" style={{ backgroundImage: 'linear-gradient(to right, #1e293b 1px, transparent 1px), linear-gradient(to bottom, #1e293b 1px, transparent 1px)', backgroundSize: '20px 20px', opacity: 0.5 }} />
+                <div className="absolute inset-0" style={{ backgroundImage: `linear-gradient(to right, #1e293b 1px, transparent 1px), linear-gradient(to bottom, #1e293b 1px, transparent 1px)`, backgroundSize: `${100 / GRID_SIZE}% ${100 / GRID_SIZE}%`, opacity: 0.5 }} />
 
                 {/* Snake */}
                 {snake.map((segment, i) => (
                     <div 
                         key={i}
-                        className={`absolute w-5 h-5 ${i === 0 ? 'bg-indigo-500 rounded-sm' : 'bg-indigo-400 rounded-sm scale-90'}`}
-                        style={{ left: segment[0] * 20, top: segment[1] * 20 }}
+                        className={`absolute ${i === 0 ? 'bg-indigo-500 rounded-sm z-20' : 'bg-indigo-400 rounded-sm scale-90 z-10'}`}
+                        style={{ 
+                            left: `${(segment[0] / GRID_SIZE) * 100}%`, 
+                            top: `${(segment[1] / GRID_SIZE) * 100}%`,
+                            width: `${100 / GRID_SIZE}%`,
+                            height: `${100 / GRID_SIZE}%`
+                        }}
                     />
                 ))}
 
                 {/* Food (Coffee) */}
                 <div 
-                    className="absolute w-5 h-5 bg-amber-500 rounded-full scale-75 animate-pulse flex items-center justify-center text-[10px]"
-                    style={{ left: food[0] * 20, top: food[1] * 20 }}
+                    className="absolute bg-amber-500 rounded-full scale-75 animate-pulse flex items-center justify-center z-10"
+                    style={{ 
+                        left: `${(food[0] / GRID_SIZE) * 100}%`, 
+                        top: `${(food[1] / GRID_SIZE) * 100}%`,
+                        width: `${100 / GRID_SIZE}%`,
+                        height: `${100 / GRID_SIZE}%`,
+                        fontSize: 'max(10px, 2vw)'
+                    }}
                 >
                     ☕
                 </div>
 
                 {/* Overlays */}
                 {!isPlaying && !gameOver && (
-                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
-                        <button onClick={resetGame} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm z-30">
+                        <button onClick={resetGame} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg">
                             Start Game
                         </button>
                     </div>
                 )}
 
                 {gameOver && (
-                    <div className="absolute inset-0 bg-rose-950/80 flex flex-col items-center justify-center backdrop-blur-sm">
+                    <div className="absolute inset-0 bg-rose-950/80 flex flex-col items-center justify-center backdrop-blur-sm z-30">
                         <h2 className="text-3xl font-bold text-white mb-2">Game Over!</h2>
                         <p className="text-rose-200 mb-6">Final Score: {score}</p>
-                        <button onClick={resetGame} className="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                        <button onClick={resetGame} className="bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-6 rounded-lg transition-colors shadow-lg">
                             Play Again
                         </button>
                     </div>
                 )}
             </div>
-            <p className="text-slate-500 text-sm mt-6">Use Arrow Keys or WASD to move.</p>
+            
+            {/* Mobile On-Screen Controls */}
+            {isPlaying && (
+                <div className="grid grid-cols-3 gap-2 mt-6 md:hidden w-full max-w-[200px]">
+                    <div />
+                    <button onClick={() => direction[1] !== 1 && setDirection([0, -1])} className="bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white p-4 rounded-xl flex justify-center items-center shadow-lg text-xl select-none">▲</button>
+                    <div />
+                    <button onClick={() => direction[0] !== 1 && setDirection([-1, 0])} className="bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white p-4 rounded-xl flex justify-center items-center shadow-lg text-xl select-none">◀</button>
+                    <button onClick={() => direction[1] !== -1 && setDirection([0, 1])} className="bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white p-4 rounded-xl flex justify-center items-center shadow-lg text-xl select-none">▼</button>
+                    <button onClick={() => direction[0] !== -1 && setDirection([1, 0])} className="bg-slate-700 hover:bg-slate-600 active:bg-slate-500 text-white p-4 rounded-xl flex justify-center items-center shadow-lg text-xl select-none">▶</button>
+                </div>
+            )}
+            
+            <p className="text-slate-500 text-sm mt-6 text-center hidden md:block">Use Arrow Keys or WASD to move.</p>
         </div>
     );
 }
