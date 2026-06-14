@@ -37,6 +37,34 @@ def get_week_shifts(start: date, db: Session = Depends(get_db), user: models.Use
             shifts.append(get_or_create_shift(db, stype, current_date))
     return shifts
 
+@router.get("/dashboard")
+def get_dashboard(db: Session = Depends(get_db), admin: models.User = Depends(get_current_admin)):
+    members = db.query(models.User).filter(models.User.role == models.RoleEnum.member).all()
+    dashboard = []
+    for m in members:
+        assignments = db.query(models.ShiftAssignment).filter(models.ShiftAssignment.user_id == m.id).all()
+        counts = {'morning': 0, 'evening': 0, 'night': 0}
+        total = 0
+        for a in assignments:
+            shift = db.query(models.Shift).filter(models.Shift.id == a.shift_id).first()
+            if shift:
+                counts[shift.shift_type.value] += 1
+                total += 1
+        dashboard.append({
+            "user": schemas.UserResponse.from_orm(m),
+            "counts": counts,
+            "total": total
+        })
+    return dashboard
+
+@router.get("/my-history", response_model=List[schemas.ShiftResponse])
+def get_my_history(db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
+    today = date.today()
+    assignments = db.query(models.ShiftAssignment).filter(models.ShiftAssignment.user_id == user.id).all()
+    shift_ids = [a.shift_id for a in assignments]
+    shifts = db.query(models.Shift).filter(models.Shift.id.in_(shift_ids), models.Shift.date < today).order_by(models.Shift.date.desc()).all()
+    return shifts
+
 @router.post("/{shift_id}/assign")
 def assign_user(shift_id: int, user_id: int, db: Session = Depends(get_db), admin: models.User = Depends(get_current_admin)):
     shift = db.query(models.Shift).filter(models.Shift.id == shift_id).first()

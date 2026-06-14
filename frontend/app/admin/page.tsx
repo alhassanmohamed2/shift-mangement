@@ -11,7 +11,7 @@ import { Users, Calendar as CalendarIcon, UserPlus, X } from 'lucide-react';
 export default function AdminPage() {
     const { user, loading } = useAuth();
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'members' | 'shifts'>('members');
+    const [activeTab, setActiveTab] = useState<'dashboard' | 'members' | 'shifts'>('dashboard');
     
     useEffect(() => {
         if (!loading && user?.role !== 'admin') {
@@ -30,7 +30,13 @@ export default function AdminPage() {
                 </div>
             </motion.div>
 
-            <div className="flex gap-4 border-b border-slate-700">
+            <div className="flex gap-4 border-b border-slate-700 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                <button 
+                    onClick={() => setActiveTab('dashboard')}
+                    className={`px-6 py-3 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'dashboard' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-white'}`}
+                >
+                    <CalendarIcon size={18} /> Dashboard
+                </button>
                 <button 
                     onClick={() => setActiveTab('members')}
                     className={`px-6 py-3 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'members' ? 'border-indigo-500 text-indigo-400' : 'border-transparent text-slate-400 hover:text-white'}`}
@@ -50,8 +56,57 @@ export default function AdminPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
             >
-                {activeTab === 'members' ? <MembersTab /> : <ShiftsTab />}
+                {activeTab === 'dashboard' ? <DashboardTab /> : activeTab === 'members' ? <MembersTab /> : <ShiftsTab />}
             </motion.div>
+        </div>
+    );
+}
+
+function DashboardTab() {
+    const [stats, setStats] = useState<any[]>([]);
+    
+    useEffect(() => {
+        api.get('/shifts/dashboard').then(res => setStats(res.data)).catch(err => toast.error('Failed to load dashboard'));
+    }, []);
+
+    return (
+        <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {stats.sort((a,b) => b.total - a.total).map((stat: any) => (
+                    <div key={stat.user.id} className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6 shadow-xl flex flex-col items-center">
+                        <MemberAvatar index={stat.user.avatar_index} name={stat.user.name} size="lg" />
+                        <h3 className="text-xl font-bold mt-4 mb-1">{stat.user.name}</h3>
+                        <p className="text-slate-400 text-sm mb-6">Total Shifts: <span className="text-white font-bold">{stat.total}</span></p>
+                        
+                        <div className="w-full space-y-3">
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="flex items-center gap-2"><span className="text-sky-400">🌅</span> Morning</span>
+                                <span className="font-bold">{stat.counts.morning}</span>
+                            </div>
+                            <div className="w-full bg-slate-900 rounded-full h-2">
+                                <div className="bg-sky-400 h-2 rounded-full" style={{ width: `${(stat.counts.morning / (stat.total || 1)) * 100}%` }} />
+                            </div>
+                            
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="flex items-center gap-2"><span className="text-indigo-400">🌇</span> Evening</span>
+                                <span className="font-bold">{stat.counts.evening}</span>
+                            </div>
+                            <div className="w-full bg-slate-900 rounded-full h-2">
+                                <div className="bg-indigo-400 h-2 rounded-full" style={{ width: `${(stat.counts.evening / (stat.total || 1)) * 100}%` }} />
+                            </div>
+                            
+                            <div className="flex justify-between items-center text-sm">
+                                <span className="flex items-center gap-2"><span className="text-slate-400">🌙</span> Night</span>
+                                <span className="font-bold">{stat.counts.night}</span>
+                            </div>
+                            <div className="w-full bg-slate-900 rounded-full h-2">
+                                <div className="bg-slate-400 h-2 rounded-full" style={{ width: `${(stat.counts.night / (stat.total || 1)) * 100}%` }} />
+                            </div>
+                        </div>
+                    </div>
+                ))}
+                {stats.length === 0 && <div className="col-span-3 text-center p-12 text-slate-500">No members found.</div>}
+            </div>
         </div>
     );
 }

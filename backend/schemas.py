@@ -12,6 +12,10 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     pass
 
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    avatar_index: Optional[int] = None
+
 class ChangePasswordRequest(BaseModel):
     old_password: str
     new_password: str

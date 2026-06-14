@@ -12,6 +12,16 @@ router = APIRouter()
 def read_users_me(current_user: models.User = Depends(get_current_user)):
     return current_user
 
+@router.put("/me", response_model=schemas.UserResponse)
+def update_user_me(user_update: schemas.UserUpdate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    if user_update.name is not None:
+        current_user.name = user_update.name
+    if user_update.avatar_index is not None:
+        current_user.avatar_index = user_update.avatar_index
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
 @router.post("", response_model=dict)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db), admin: models.User = Depends(get_current_admin)):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()

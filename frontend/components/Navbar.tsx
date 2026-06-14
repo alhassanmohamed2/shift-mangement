@@ -5,12 +5,12 @@ import { LogOut, Calendar, MonitorPlay, FileText, Settings } from 'lucide-react'
 import { usePathname } from 'next/navigation';
 
 import { useState } from 'react';
-import ChangePasswordModal from './ChangePasswordModal';
+import UserProfileModal from './UserProfileModal';
 
 export default function Navbar() {
     const { user, logout } = useAuth();
     const pathname = usePathname();
-    const [showChangePassword, setShowChangePassword] = useState(false);
+    const [showProfileModal, setShowProfileModal] = useState(false);
 
     if (!user || pathname === '/login') return null;
 
@@ -27,9 +27,15 @@ export default function Navbar() {
                             <Link href="/live" className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname === '/live' ? 'text-white bg-slate-800' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
                                 <MonitorPlay size={18} /> Live
                             </Link>
-                            <Link href="/schedule" className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname === '/schedule' ? 'text-white bg-slate-800' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
-                                <Calendar size={18} /> Schedule
-                            </Link>
+                            {user.role === 'admin' ? (
+                                <Link href="/schedule" className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname === '/schedule' ? 'text-white bg-slate-800' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
+                                    <Calendar size={18} /> Schedule
+                                </Link>
+                            ) : (
+                                <Link href="/me" className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname === '/me' ? 'text-white bg-slate-800' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
+                                    <Calendar size={18} /> My Shifts
+                                </Link>
+                            )}
                             <Link href="/logs" className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${pathname === '/logs' ? 'text-white bg-slate-800' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
                                 <FileText size={18} /> Logs
                             </Link>
@@ -41,7 +47,7 @@ export default function Navbar() {
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <button onClick={() => setShowChangePassword(true)} className="text-sm font-medium text-slate-300 hidden sm:block hover:text-white transition-colors">
+                        <button onClick={() => setShowProfileModal(true)} className="text-sm font-medium text-slate-300 hidden sm:block hover:text-white transition-colors">
                             {user.sub}
                         </button>
                         <button onClick={logout} className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-full transition-colors" title="Logout">
@@ -51,7 +57,7 @@ export default function Navbar() {
                 </div>
             </div>
         </nav>
-        {showChangePassword && <ChangePasswordModal onClose={() => setShowChangePassword(false)} />}
+        {showProfileModal && <UserProfileModal onClose={() => setShowProfileModal(false)} />}
         </>
     );
 }
