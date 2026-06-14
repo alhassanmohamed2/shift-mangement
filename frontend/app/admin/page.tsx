@@ -403,13 +403,13 @@ function ShiftsTab() {
                             </div>
 
                             {shift && count < 3 && (
-                                <div className="flex gap-2">
+                                <div className="flex flex-col sm:flex-row gap-2 mt-4">
                                     <select 
-                                        className="flex-grow bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none"
+                                        className="flex-grow min-w-0 bg-slate-900 border border-slate-700 rounded-lg px-3 py-3 sm:py-2 text-sm focus:outline-none"
                                         id={`select-${shift.id}`}
                                         defaultValue=""
                                     >
-                                        <option value="" disabled>Select member to assign...</option>
+                                        <option value="" disabled>Select member...</option>
                                         {members.filter(m => !shift.assignments.find((a:any) => a.user.id === m.id)).map(m => (
                                             <option key={m.id} value={m.id}>{m.name}</option>
                                         ))}
@@ -422,7 +422,7 @@ function ShiftsTab() {
                                                 (document.getElementById(`select-${shift.id}`) as HTMLSelectElement).value = "";
                                             }
                                         }}
-                                        className="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                                        className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition-colors shrink-0"
                                     >
                                         Assign
                                     </button>
