@@ -65,6 +65,14 @@ def get_my_history(db: Session = Depends(get_db), user: models.User = Depends(ge
     shifts = db.query(models.Shift).filter(models.Shift.id.in_(shift_ids), models.Shift.date < today).order_by(models.Shift.date.desc()).all()
     return shifts
 
+@router.get("/my-upcoming", response_model=List[schemas.ShiftResponse])
+def get_my_upcoming(db: Session = Depends(get_db), user: models.User = Depends(get_current_user)):
+    today = date.today()
+    assignments = db.query(models.ShiftAssignment).filter(models.ShiftAssignment.user_id == user.id).all()
+    shift_ids = [a.shift_id for a in assignments]
+    shifts = db.query(models.Shift).filter(models.Shift.id.in_(shift_ids), models.Shift.date >= today).order_by(models.Shift.date.asc()).all()
+    return shifts
+
 @router.post("/{shift_id}/assign")
 def assign_user(shift_id: int, user_id: int, db: Session = Depends(get_db), admin: models.User = Depends(get_current_admin)):
     shift = db.query(models.Shift).filter(models.Shift.id == shift_id).first()
