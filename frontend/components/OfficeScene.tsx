@@ -108,7 +108,7 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
                             {member ? (
                                 <>
                                     {/* Name Tag */}
-                                    <div className="absolute -top-6 bg-slate-900/90 border border-indigo-500/30 px-3 py-1 rounded-md text-xs font-bold text-indigo-200 shadow-lg z-30 flex items-center gap-2">
+                                    <div className="absolute -bottom-10 bg-slate-900/90 border border-indigo-500/30 px-3 py-1 rounded-md text-xs font-bold text-indigo-200 shadow-lg z-30 flex items-center gap-2">
                                         <div className={`w-2 h-2 rounded-full ${i === currentSpeakerIdx ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
                                         {member.user.name}
                                     </div>
@@ -168,7 +168,7 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
                                     </div>
                                 </>
                             ) : (
-                                <div className="absolute -top-2 text-slate-500 text-xs font-medium z-30">Empty Station</div>
+                                <div className="absolute -bottom-10 text-slate-500 text-xs font-medium z-30">Empty Station</div>
                             )}
 
                             {/* The Desk Setup (always visible, even if empty) */}
