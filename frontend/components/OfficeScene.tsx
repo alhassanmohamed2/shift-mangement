@@ -70,24 +70,41 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
                                         {member.user.name}
                                     </div>
                                     
+                                    {/* Chat Bubble */}
+                                    <motion.div 
+                                        animate={{ opacity: [0, 1, 1, 0], y: [10, 0, 0, -10], scale: [0.8, 1, 1, 0.8] }} 
+                                        transition={{ duration: 4, delay: i * 4 + 2, repeat: Infinity, repeatDelay: 8 }}
+                                        className="absolute -top-16 -right-12 bg-white text-slate-900 px-3 py-2 rounded-2xl rounded-bl-sm text-xs font-bold shadow-2xl z-40 whitespace-nowrap"
+                                    >
+                                        {['LGTM 🚀', 'Coffee time ☕', 'Deploying...'][i % 3]}
+                                    </motion.div>
+
                                     {/* Character Behind Desk */}
                                     <div className="absolute bottom-20 flex flex-col items-center z-10">
                                         {/* Head & Headphones */}
                                         <motion.div 
-                                            animate={{ y: [0, -2, 0], rotate: [-1, 1, -1] }} 
-                                            transition={{ duration: 3, delay: i * 0.5, repeat: Infinity }}
+                                            animate={{ 
+                                                y: [0, -2, 0], 
+                                                rotate: [-1, 1, -1],
+                                                x: [0, i === 0 ? 5 : i === 2 ? -5 : 0, 0] // leaning towards each other
+                                            }} 
+                                            transition={{ duration: 4, delay: i * 0.5, repeat: Infinity }}
                                             className="relative z-20"
                                         >
-                                            <div className="w-6 h-8 bg-slate-800 absolute -left-1 -top-1 rounded-l-lg" /> {/* Left ear cup */}
-                                            <div className="w-6 h-8 bg-slate-800 absolute -right-1 -top-1 rounded-r-lg" /> {/* Right ear cup */}
-                                            <div className="w-16 h-3 bg-slate-800 absolute -top-3 rounded-t-lg" /> {/* Headband */}
+                                            <div className="w-6 h-8 bg-slate-800 absolute -left-1 -top-1 rounded-l-lg" />
+                                            <div className="w-6 h-8 bg-slate-800 absolute -right-1 -top-1 rounded-r-lg" />
+                                            <div className="w-16 h-3 bg-slate-800 absolute -top-3 rounded-t-lg" />
                                             
                                             <div className="w-14 h-16 bg-amber-100 rounded-2xl border-2 border-slate-800 flex flex-col items-center pt-4 relative overflow-hidden">
-                                                {/* Eyes */}
-                                                <div className="flex gap-2 w-full justify-center">
+                                                {/* Eyes moving */}
+                                                <motion.div 
+                                                    animate={{ x: [0, i === 0 ? 4 : i === 2 ? -4 : 4, 0] }}
+                                                    transition={{ duration: 3, delay: i, repeat: Infinity, repeatDelay: 2 }}
+                                                    className="flex gap-2 w-full justify-center relative"
+                                                >
                                                     <motion.div animate={{ scaleY: [1, 0.1, 1] }} transition={{ duration: 0.1, delay: 2+i, repeat: Infinity, repeatDelay: 5 }} className="w-2 h-2 bg-slate-900 rounded-full" />
                                                     <motion.div animate={{ scaleY: [1, 0.1, 1] }} transition={{ duration: 0.1, delay: 2+i, repeat: Infinity, repeatDelay: 5 }} className="w-2 h-2 bg-slate-900 rounded-full" />
-                                                </div>
+                                                </motion.div>
                                                 {/* Glasses */}
                                                 <div className="absolute top-3 w-12 h-4 border-2 border-slate-900 rounded-sm opacity-50" />
                                             </div>
@@ -149,25 +166,23 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
                                 </div>
                             </div>
                             
-                            {/* Server Rack / Plant between desks */}
-                            {i < 2 && (
-                                <div className="absolute -right-8 bottom-0 w-12 h-32 bg-slate-900 border-2 border-slate-700 rounded-t-md flex flex-col gap-1 p-1 z-0">
-                                    {[...Array(6)].map((_, j) => (
-                                        <div key={j} className="w-full h-4 bg-slate-800 rounded border border-slate-700 flex items-center px-1 gap-1">
-                                            <motion.div 
-                                                animate={{ opacity: [1, 0.2, 1] }} 
-                                                transition={{ duration: 0.5, delay: Math.random() * 2, repeat: Infinity }}
-                                                className="w-1 h-1 bg-emerald-500 rounded-full" 
-                                            />
-                                            <motion.div 
-                                                animate={{ opacity: [1, 0.2, 1] }} 
-                                                transition={{ duration: 1, delay: Math.random() * 2, repeat: Infinity }}
-                                                className="w-1 h-1 bg-blue-500 rounded-full" 
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
+                            {/* Server Rack (Now visible on all desks!) */}
+                            <div className="absolute -right-8 bottom-0 w-12 h-32 bg-slate-900 border-2 border-slate-700 rounded-t-md flex flex-col gap-1 p-1 z-0 shadow-lg">
+                                {[...Array(6)].map((_, j) => (
+                                    <div key={j} className="w-full h-4 bg-slate-800 rounded border border-slate-700 flex items-center px-1 gap-1">
+                                        <motion.div 
+                                            animate={{ opacity: [1, 0.2, 1] }} 
+                                            transition={{ duration: 0.5, delay: Math.random() * 2, repeat: Infinity }}
+                                            className="w-1 h-1 bg-emerald-500 rounded-full" 
+                                        />
+                                        <motion.div 
+                                            animate={{ opacity: [1, 0.2, 1] }} 
+                                            transition={{ duration: 1, delay: Math.random() * 2, repeat: Infinity }}
+                                            className="w-1 h-1 bg-blue-500 rounded-full" 
+                                        />
+                                    </div>
+                                ))}
+                            </div>
 
                         </div>
                     );
