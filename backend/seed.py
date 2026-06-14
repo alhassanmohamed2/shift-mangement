@@ -19,10 +19,12 @@ def seed():
                 avatar_index=1
             )
             db.add(admin)
-            db.commit()
             print("Admin account created.")
         else:
-            print("Admin account already exists.")
+            admin.hashed_password = get_password_hash(admin_password)
+            print("Admin account password updated.")
+        
+        db.commit()
     finally:
         db.close()
 
