@@ -39,3 +39,17 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db), admin: 
 def get_all_users(db: Session = Depends(get_db), admin: models.User = Depends(get_current_admin)):
     users = db.query(models.User).order_by(models.User.id.desc()).all()
     return users
+
+@router.post("/{user_id}/reset-password", response_model=dict)
+def reset_password(user_id: int, db: Session = Depends(get_db), admin: models.User = Depends(get_current_admin)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+    new_password = ''.join(secrets.choice(alphabet) for i in range(12))
+    
+    user.hashed_password = auth.get_password_hash(new_password)
+    db.commit()
+    
+    return {"detail": "Password reset successfully", "new_password": new_password}

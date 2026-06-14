@@ -60,7 +60,7 @@ function MembersTab() {
     const [members, setMembers] = useState<any[]>([]);
     const [showModal, setShowModal] = useState(false);
     const [newMember, setNewMember] = useState({ name: '', email: '', avatar_index: 1 });
-    const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
+    const [generatedPassword, setGeneratedPassword] = useState<{password: string, isReset: boolean} | null>(null);
 
     const loadMembers = () => {
         api.get('/users').then(res => setMembers(res.data)).catch(() => toast.error('Failed to load members'));
@@ -74,11 +74,23 @@ function MembersTab() {
         e.preventDefault();
         try {
             const res = await api.post('/users', { ...newMember, role: 'member' });
-            setGeneratedPassword(res.data.password);
+            setGeneratedPassword({password: res.data.password, isReset: false});
             loadMembers();
             setNewMember({ name: '', email: '', avatar_index: 1 });
         } catch (error: any) {
             toast.error(error.response?.data?.detail || 'Failed to add member');
+        }
+    };
+
+    const handleResetPassword = async (userId: number, userName: string) => {
+        if (!confirm(`Are you sure you want to reset the password for ${userName}?`)) return;
+        try {
+            const res = await api.post(`/users/${userId}/reset-password`);
+            setGeneratedPassword({password: res.data.new_password, isReset: true});
+            setShowModal(true);
+            toast.success(`Password reset for ${userName}`);
+        } catch (error: any) {
+            toast.error(error.response?.data?.detail || 'Failed to reset password');
         }
     };
 
@@ -98,6 +110,7 @@ function MembersTab() {
                             <th className="p-4 text-slate-300 font-medium">Name</th>
                             <th className="p-4 text-slate-300 font-medium">Email</th>
                             <th className="p-4 text-slate-300 font-medium">Role</th>
+                            <th className="p-4 text-slate-300 font-medium text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -107,6 +120,14 @@ function MembersTab() {
                                 <td className="p-4 text-slate-200 font-medium">{member.name}</td>
                                 <td className="p-4 text-slate-400">{member.email}</td>
                                 <td className="p-4"><span className="px-2 py-1 bg-slate-700 rounded text-xs uppercase tracking-wider">{member.role}</span></td>
+                                <td className="p-4 text-right">
+                                    <button 
+                                        onClick={() => handleResetPassword(member.id, member.name)}
+                                        className="text-xs bg-slate-700 hover:bg-indigo-600 text-white px-3 py-1 rounded transition-colors"
+                                    >
+                                        Reset Password
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
@@ -117,16 +138,16 @@ function MembersTab() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                     <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-md overflow-hidden shadow-2xl">
                         <div className="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
-                            <h2 className="text-xl font-bold">Add Team Member</h2>
+                            <h2 className="text-xl font-bold">{generatedPassword?.isReset ? 'Password Reset' : 'Add Team Member'}</h2>
                             <button onClick={() => { setShowModal(false); setGeneratedPassword(null); }} className="text-slate-400 hover:text-white"><X size={20} /></button>
                         </div>
                         {generatedPassword ? (
                             <div className="p-8 text-center space-y-4">
                                 <div className="w-16 h-16 bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4"><UserPlus size={32} /></div>
-                                <h3 className="text-2xl font-bold text-white">Member Created!</h3>
+                                <h3 className="text-2xl font-bold text-white">{generatedPassword.isReset ? 'Password Reset!' : 'Member Created!'}</h3>
                                 <p className="text-slate-400">Copy this temporary password. It will only be shown once.</p>
                                 <div className="bg-slate-900 p-4 rounded-lg font-mono text-xl border border-slate-700 text-emerald-400 font-bold select-all">
-                                    {generatedPassword}
+                                    {generatedPassword.password}
                                 </div>
                                 <button onClick={() => { setShowModal(false); setGeneratedPassword(null); }} className="w-full mt-6 bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-medium transition-colors">Done</button>
                             </div>

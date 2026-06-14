@@ -53,3 +53,15 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
         data={"sub": user.email, "role": user.role.value}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+@router.post("/change-password")
+def change_password(request: schemas.ChangePasswordRequest, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if not auth.verify_password(request.old_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="Incorrect old password")
+    
+    if len(request.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
+        
+    current_user.hashed_password = auth.get_password_hash(request.new_password)
+    db.commit()
+    return {"detail": "Password updated successfully"}

@@ -12,6 +12,10 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     pass
 
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
 class UserResponse(UserBase):
     id: int
     created_at: datetime
