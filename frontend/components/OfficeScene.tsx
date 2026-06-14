@@ -4,11 +4,54 @@ import { useEffect, useState } from 'react';
 
 export default function OfficeScene({ members, shiftType }: { members: any[], shiftType: string }) {
     const [time, setTime] = useState(new Date());
+    const [chatStep, setChatStep] = useState(0);
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
+
+    useEffect(() => {
+        const chatTimer = setInterval(() => {
+            setChatStep(prev => prev + 1);
+        }, 5000); // Next message every 5 seconds
+        return () => clearInterval(chatTimer);
+    }, []);
+
+    const IT_SCRIPT = [
+        "Hey, did anyone check the logs for the DB spike? 📉",
+        "Yeah, looks like a huge influx of auth requests. 🧐",
+        "I'll scale up the instances just in case. 🚀",
+        "Thanks. I'll monitor the latency. ⏱️",
+        "Wait, the spike is coming from a single IP? 🚩",
+        "Blocking it at the firewall level right now. 🛑",
+        "Good catch! Crisis averted. 😌",
+        "We should probably add rate limiting to that endpoint. 🛠️",
+        "I'll open a Jira ticket for it. 📝",
+        "Awesome. I'm going to grab another coffee. ☕",
+        "The deployment to staging just failed... again. 🤦‍♂️",
+        "Did you update the environment variables? 🤔",
+        "Ah, good call. Let me check the secrets vault. 🔐",
+        "Yep, missing the new API key. Adding it now. 🔑",
+        "Redeploying... cross your fingers! 🤞",
+        "Pipeline is green! We are good to go. ✅",
+        "Who approved that massive PR without tests? 🤨",
+        "Guilty... I'll add the tests right now. 😅",
+        "Make sure you mock the external services this time! 🤖",
+        "Will do. 🫡",
+        "Anyone else getting a weird CORS error on localhost? 🌐",
+        "Clear your browser cache, usually fixes it. 🧹",
+        "Wow, you're a lifesaver. It worked! 🎉",
+        "I'm seeing high memory usage on the frontend container. 📈",
+        "Probably a memory leak in the new React hooks. 🪝",
+        "I'll run a profiler on it after lunch. 🍔"
+    ];
+
+    const activeMemberIndices = [0, 1, 2].filter(i => members[i]);
+    const currentSpeakerIdx = activeMemberIndices.length > 0 
+        ? activeMemberIndices[chatStep % activeMemberIndices.length] 
+        : -1;
+    const currentMessage = IT_SCRIPT[chatStep % IT_SCRIPT.length];
 
     const isMorning = shiftType === 'morning';
     const isEvening = shiftType === 'evening';
@@ -66,48 +109,58 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
                                 <>
                                     {/* Name Tag */}
                                     <div className="absolute -top-6 bg-slate-900/90 border border-indigo-500/30 px-3 py-1 rounded-md text-xs font-bold text-indigo-200 shadow-lg z-30 flex items-center gap-2">
-                                        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                        <div className={`w-2 h-2 rounded-full ${i === currentSpeakerIdx ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
                                         {member.user.name}
                                     </div>
                                     
                                     {/* Chat Bubble */}
                                     <motion.div 
-                                        animate={{ opacity: [0, 1, 1, 0], y: [10, 0, 0, -10], scale: [0.8, 1, 1, 0.8] }} 
-                                        transition={{ duration: 4, delay: i * 4 + 2, repeat: Infinity, repeatDelay: 8 }}
-                                        className="absolute -top-16 -right-12 bg-white text-slate-900 px-3 py-2 rounded-2xl rounded-bl-sm text-xs font-bold shadow-2xl z-40 whitespace-nowrap"
+                                        initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                                        animate={{ 
+                                            opacity: i === currentSpeakerIdx ? 1 : 0, 
+                                            y: i === currentSpeakerIdx ? 0 : 10, 
+                                            scale: i === currentSpeakerIdx ? 1 : 0.8 
+                                        }} 
+                                        transition={{ duration: 0.4, type: 'spring' }}
+                                        className="absolute -top-16 -right-16 bg-white text-slate-900 px-4 py-2 rounded-2xl rounded-bl-sm text-sm font-bold shadow-2xl z-40 max-w-[220px]"
                                     >
-                                        {['LGTM 🚀', 'Coffee time ☕', 'Deploying...'][i % 3]}
+                                        {currentMessage}
                                     </motion.div>
 
                                     {/* Character Behind Desk */}
                                     <div className="absolute bottom-20 flex flex-col items-center z-10">
-                                        {/* Head & Headphones */}
+                                        {/* Head & Headphones wrapper (for turning left/right to look at speaker) */}
                                         <motion.div 
-                                            animate={{ 
-                                                y: [0, -2, 0], 
-                                                rotate: [-1, 1, -1],
-                                                x: [0, i === 0 ? 5 : i === 2 ? -5 : 0, 0] // leaning towards each other
-                                            }} 
-                                            transition={{ duration: 4, delay: i * 0.5, repeat: Infinity }}
+                                            animate={{ x: i === currentSpeakerIdx ? 0 : (currentSpeakerIdx < i && currentSpeakerIdx !== -1 ? -6 : currentSpeakerIdx > i ? 6 : 0) }} 
+                                            transition={{ duration: 0.6, type: 'spring' }}
                                             className="relative z-20"
                                         >
-                                            <div className="w-6 h-8 bg-slate-800 absolute -left-1 -top-1 rounded-l-lg" />
-                                            <div className="w-6 h-8 bg-slate-800 absolute -right-1 -top-1 rounded-r-lg" />
-                                            <div className="w-16 h-3 bg-slate-800 absolute -top-3 rounded-t-lg" />
-                                            
-                                            <div className="w-14 h-16 bg-amber-100 rounded-2xl border-2 border-slate-800 flex flex-col items-center pt-4 relative overflow-hidden">
-                                                {/* Eyes moving */}
-                                                <motion.div 
-                                                    animate={{ x: [0, i === 0 ? 4 : i === 2 ? -4 : 4, 0] }}
-                                                    transition={{ duration: 3, delay: i, repeat: Infinity, repeatDelay: 2 }}
-                                                    className="flex gap-2 w-full justify-center relative"
-                                                >
-                                                    <motion.div animate={{ scaleY: [1, 0.1, 1] }} transition={{ duration: 0.1, delay: 2+i, repeat: Infinity, repeatDelay: 5 }} className="w-2 h-2 bg-slate-900 rounded-full" />
-                                                    <motion.div animate={{ scaleY: [1, 0.1, 1] }} transition={{ duration: 0.1, delay: 2+i, repeat: Infinity, repeatDelay: 5 }} className="w-2 h-2 bg-slate-900 rounded-full" />
-                                                </motion.div>
-                                                {/* Glasses */}
-                                                <div className="absolute top-3 w-12 h-4 border-2 border-slate-900 rounded-sm opacity-50" />
-                                            </div>
+                                            {/* Head bobbing up and down */}
+                                            <motion.div
+                                                animate={{ 
+                                                    y: i === currentSpeakerIdx ? [-4, 0, -4] : [0, -2, 0], 
+                                                    rotate: i === currentSpeakerIdx ? [-2, 2, -2] : [-1, 1, -1] 
+                                                }}
+                                                transition={{ duration: i === currentSpeakerIdx ? 0.5 : 3, repeat: Infinity }}
+                                            >
+                                                <div className="w-6 h-8 bg-slate-800 absolute -left-1 -top-1 rounded-l-lg" />
+                                                <div className="w-6 h-8 bg-slate-800 absolute -right-1 -top-1 rounded-r-lg" />
+                                                <div className="w-16 h-3 bg-slate-800 absolute -top-3 rounded-t-lg" />
+                                                
+                                                <div className="w-14 h-16 bg-amber-100 rounded-2xl border-2 border-slate-800 flex flex-col items-center pt-4 relative overflow-hidden">
+                                                    {/* Eyes moving */}
+                                                    <motion.div 
+                                                        animate={{ x: i === currentSpeakerIdx ? 0 : (currentSpeakerIdx < i && currentSpeakerIdx !== -1 ? -4 : currentSpeakerIdx > i ? 4 : 0) }}
+                                                        transition={{ duration: 0.5, type: 'spring' }}
+                                                        className="flex gap-2 w-full justify-center relative"
+                                                    >
+                                                        <motion.div animate={{ scaleY: [1, 0.1, 1] }} transition={{ duration: 0.1, delay: 2+i, repeat: Infinity, repeatDelay: 5 }} className="w-2 h-2 bg-slate-900 rounded-full" />
+                                                        <motion.div animate={{ scaleY: [1, 0.1, 1] }} transition={{ duration: 0.1, delay: 2+i, repeat: Infinity, repeatDelay: 5 }} className="w-2 h-2 bg-slate-900 rounded-full" />
+                                                    </motion.div>
+                                                    {/* Glasses */}
+                                                    <div className="absolute top-3 w-12 h-4 border-2 border-slate-900 rounded-sm opacity-50" />
+                                                </div>
+                                            </motion.div>
                                         </motion.div>
                                         
                                         {/* Body */}
