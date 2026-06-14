@@ -122,7 +122,7 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
                                             scale: i === currentSpeakerIdx ? 1 : 0.8 
                                         }} 
                                         transition={{ duration: 0.4, type: 'spring' }}
-                                        className="absolute -top-16 -right-16 bg-white text-slate-900 px-4 py-2 rounded-2xl rounded-bl-sm text-sm font-bold shadow-2xl z-40 max-w-[220px]"
+                                        className="absolute -top-36 -right-8 bg-white text-slate-900 px-4 py-2 rounded-2xl rounded-bl-sm text-sm font-bold shadow-2xl z-40 max-w-[220px]"
                                     >
                                         {currentMessage}
                                     </motion.div>
