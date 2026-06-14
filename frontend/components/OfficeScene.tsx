@@ -98,13 +98,13 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
             </div>
 
             {/* IT Desks Floor Area */}
-            <div className="relative md:absolute bottom-0 w-full md:h-1/2 bg-gradient-to-b from-transparent via-slate-800/80 to-slate-900 border-t-4 border-slate-700 flex flex-col md:flex-row justify-evenly items-center md:items-end px-4 pt-48 md:pt-0 pb-16 gap-32 md:gap-4 mt-auto">
+            <div className="relative md:absolute bottom-0 w-full md:h-1/2 bg-gradient-to-b from-transparent via-slate-800/80 to-slate-900 border-t-4 border-slate-700 flex flex-col md:flex-row justify-evenly items-center md:items-end px-4 pt-16 md:pt-0 pb-16 gap-16 md:gap-4 mt-auto">
                 
                 {/* Render Members or Empty Desks */}
                 {[0, 1, 2].map((i) => {
                     const member = members[i];
                     return (
-                        <div key={i} className="relative w-48 h-48 shrink-0 flex flex-col items-center justify-end">
+                        <div key={i} className="relative w-48 h-[340px] md:h-48 shrink-0 flex flex-col items-center justify-end">
                             {member ? (
                                 <>
                                     {/* Name Tag */}
@@ -122,7 +122,7 @@ export default function OfficeScene({ members, shiftType }: { members: any[], sh
                                             scale: i === currentSpeakerIdx ? 1 : 0.8 
                                         }} 
                                         transition={{ duration: 0.4, type: 'spring' }}
-                                        className="absolute -top-36 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:-right-8 bg-white text-slate-900 px-4 py-2 rounded-2xl rounded-bl-sm text-sm font-bold shadow-2xl z-40 w-[200px] md:max-w-[220px]"
+                                        className="absolute bottom-[240px] md:bottom-auto md:-top-36 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:-right-8 bg-white text-slate-900 px-4 py-2 rounded-2xl rounded-b-sm md:rounded-bl-sm text-sm font-bold shadow-2xl z-40 w-[200px] md:max-w-[220px]"
                                     >
                                         {currentMessage}
                                     </motion.div>
