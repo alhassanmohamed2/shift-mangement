@@ -115,6 +115,7 @@ function MembersTab() {
     const [members, setMembers] = useState<any[]>([]);
     const [showModal, setShowModal] = useState(false);
     const [newMember, setNewMember] = useState({ name: '', email: '', avatar_index: 1 });
+    const [editingMemberId, setEditingMemberId] = useState<number | null>(null);
     const [generatedPassword, setGeneratedPassword] = useState<{password: string, isReset: boolean} | null>(null);
 
     const loadMembers = () => {
@@ -125,15 +126,22 @@ function MembersTab() {
         loadMembers();
     }, []);
 
-    const handleAdd = async (e: React.FormEvent) => {
+    const handleAddOrEdit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await api.post('/users', { ...newMember, role: 'member' });
-            setGeneratedPassword({password: res.data.password, isReset: false});
+            if (editingMemberId) {
+                await api.put(`/users/${editingMemberId}`, newMember);
+                toast.success('Member updated');
+                setShowModal(false);
+            } else {
+                const res = await api.post('/users', { ...newMember, role: 'member' });
+                setGeneratedPassword({password: res.data.password, isReset: false});
+            }
             loadMembers();
             setNewMember({ name: '', email: '', avatar_index: 1 });
+            setEditingMemberId(null);
         } catch (error: any) {
-            toast.error(error.response?.data?.detail || 'Failed to add member');
+            toast.error(error.response?.data?.detail || 'Failed to save member');
         }
     };
 
@@ -149,10 +157,27 @@ function MembersTab() {
         }
     };
 
+    const handleDelete = async (userId: number, userName: string) => {
+        if (!confirm(`Are you sure you want to completely delete ${userName}?`)) return;
+        try {
+            await api.delete(`/users/${userId}`);
+            toast.success('Member deleted');
+            loadMembers();
+        } catch (error: any) {
+            toast.error(error.response?.data?.detail || 'Failed to delete');
+        }
+    };
+
+    const openEdit = (member: any) => {
+        setNewMember({ name: member.name, email: member.email, avatar_index: member.avatar_index });
+        setEditingMemberId(member.id);
+        setShowModal(true);
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex justify-end">
-                <button onClick={() => setShowModal(true)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
+                <button onClick={() => { setEditingMemberId(null); setNewMember({ name: '', email: '', avatar_index: 1 }); setShowModal(true); }} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors">
                     <UserPlus size={18} /> Add Member
                 </button>
             </div>
@@ -175,12 +200,24 @@ function MembersTab() {
                                 <td className="p-4 text-slate-200 font-medium">{member.name}</td>
                                 <td className="p-4 text-slate-400">{member.email}</td>
                                 <td className="p-4"><span className="px-2 py-1 bg-slate-700 rounded text-xs uppercase tracking-wider">{member.role}</span></td>
-                                <td className="p-4 text-right">
+                                <td className="p-4 text-right space-x-2">
+                                    <button 
+                                        onClick={() => openEdit(member)}
+                                        className="text-xs bg-slate-700 hover:bg-sky-600 text-white px-3 py-1 rounded transition-colors"
+                                    >
+                                        Edit
+                                    </button>
                                     <button 
                                         onClick={() => handleResetPassword(member.id, member.name)}
                                         className="text-xs bg-slate-700 hover:bg-indigo-600 text-white px-3 py-1 rounded transition-colors"
                                     >
                                         Reset Password
+                                    </button>
+                                    <button 
+                                        onClick={() => handleDelete(member.id, member.name)}
+                                        className="text-xs bg-rose-900/50 hover:bg-rose-600 text-white px-3 py-1 rounded transition-colors"
+                                    >
+                                        Delete
                                     </button>
                                 </td>
                             </tr>
@@ -193,7 +230,7 @@ function MembersTab() {
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
                     <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="bg-slate-800 rounded-2xl border border-slate-700 w-full max-w-md overflow-hidden shadow-2xl">
                         <div className="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
-                            <h2 className="text-xl font-bold">{generatedPassword?.isReset ? 'Password Reset' : 'Add Team Member'}</h2>
+                            <h2 className="text-xl font-bold">{generatedPassword?.isReset ? 'Password Reset' : editingMemberId ? 'Edit Team Member' : 'Add Team Member'}</h2>
                             <button onClick={() => { setShowModal(false); setGeneratedPassword(null); }} className="text-slate-400 hover:text-white"><X size={20} /></button>
                         </div>
                         {generatedPassword ? (
@@ -207,27 +244,27 @@ function MembersTab() {
                                 <button onClick={() => { setShowModal(false); setGeneratedPassword(null); }} className="w-full mt-6 bg-slate-700 hover:bg-slate-600 py-3 rounded-lg font-medium transition-colors">Done</button>
                             </div>
                         ) : (
-                            <form onSubmit={handleAdd} className="p-6 space-y-4">
+                            <form onSubmit={handleAddOrEdit} className="p-6 space-y-4">
                                 <div>
                                     <label className="block text-sm font-medium text-slate-400 mb-1">Name</label>
                                     <input type="text" value={newMember.name} onChange={e => setNewMember({...newMember, name: e.target.value})} required className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 outline-none" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-400 mb-1">Email</label>
-                                    <input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} required className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 outline-none" />
+                                    <input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} required disabled={!!editingMemberId} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 outline-none disabled:opacity-50" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-slate-400 mb-2">Avatar Color</label>
                                     <div className="flex gap-2">
                                         {[1,2,3,4,5,6,7,8].map(i => (
                                             <button key={i} type="button" onClick={() => setNewMember({...newMember, avatar_index: i})} className={`relative w-8 h-8 rounded-full border-2 ${newMember.avatar_index === i ? 'border-white scale-110 shadow-lg' : 'border-transparent'}`}>
-                                                <MemberAvatar index={i} name="A" size="sm" />
+                                                <MemberAvatar index={i} name={newMember.name || "A"} size="sm" />
                                             </button>
                                         ))}
                                     </div>
                                 </div>
                                 <div className="pt-4">
-                                    <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg font-medium transition-colors">Create Member</button>
+                                    <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 py-3 rounded-lg font-medium transition-colors">{editingMemberId ? 'Save Changes' : 'Create Member'}</button>
                                 </div>
                             </form>
                         )}

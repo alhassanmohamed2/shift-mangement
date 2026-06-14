@@ -14,13 +14,15 @@ export default function MemberAvatar({ index, name, size = 'md' }: { index: numb
         lg: 'w-16 h-16 text-2xl'
     };
 
+    const avatarUrl = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${encodeURIComponent(name)}`;
+
     return (
         <motion.div 
             whileHover={{ scale: 1.1 }}
-            className={`${sizeClasses[size]} ${color} text-white rounded-full flex items-center justify-center font-bold shadow-lg border-2 border-slate-800`}
+            className={`${sizeClasses[size]} ${color} rounded-full flex items-center justify-center shadow-lg border-2 border-slate-800 overflow-hidden bg-white`}
             title={name}
         >
-            {name.charAt(0).toUpperCase()}
+            <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
         </motion.div>
     );
 }

@@ -63,3 +63,30 @@ def reset_password(user_id: int, db: Session = Depends(get_db), admin: models.Us
     db.commit()
     
     return {"detail": "Password reset successfully", "new_password": new_password}
+
+@router.delete("/{user_id}", response_model=dict)
+def delete_user(user_id: int, db: Session = Depends(get_db), admin: models.User = Depends(get_current_admin)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.id == admin.id:
+        raise HTTPException(status_code=400, detail="Cannot delete yourself")
+        
+    db.delete(user)
+    db.commit()
+    return {"status": "success", "detail": "User deleted"}
+
+@router.put("/{user_id}", response_model=schemas.UserResponse)
+def update_user_by_admin(user_id: int, user_update: schemas.UserUpdate, db: Session = Depends(get_db), admin: models.User = Depends(get_current_admin)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if user_update.name is not None:
+        user.name = user_update.name
+    if user_update.avatar_index is not None:
+        user.avatar_index = user_update.avatar_index
+        
+    db.commit()
+    db.refresh(user)
+    return user
