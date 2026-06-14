@@ -254,7 +254,7 @@ function MembersTab() {
                                     <input type="email" value={newMember.email} onChange={e => setNewMember({...newMember, email: e.target.value})} required disabled={!!editingMemberId} className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 focus:ring-1 focus:ring-indigo-500 outline-none disabled:opacity-50" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-400 mb-2">Avatar Color</label>
+                                    <label className="block text-sm font-medium text-slate-400 mb-2">Choose Avatar</label>
                                     <div className="flex gap-2">
                                         {[1,2,3,4,5,6,7,8].map(i => (
                                             <button key={i} type="button" onClick={() => setNewMember({...newMember, avatar_index: i})} className={`relative w-8 h-8 rounded-full border-2 ${newMember.avatar_index === i ? 'border-white scale-110 shadow-lg' : 'border-transparent'}`}>

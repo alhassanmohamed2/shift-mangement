@@ -14,7 +14,7 @@ export default function MemberAvatar({ index, name, size = 'md' }: { index: numb
         lg: 'w-16 h-16 text-2xl'
     };
 
-    const avatarUrl = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${encodeURIComponent(name)}`;
+    const avatarUrl = `https://api.dicebear.com/9.x/bottts-neutral/svg?seed=${encodeURIComponent(name + '-' + index)}`;
 
     return (
         <motion.div 
