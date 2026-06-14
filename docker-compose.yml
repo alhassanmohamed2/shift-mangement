@@ -44,7 +44,7 @@ services:
     depends_on:
       - backend
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8527
+      NEXT_PUBLIC_API_URL: /api
       PORT: 8578
     ports:
       - "8578:8578"
