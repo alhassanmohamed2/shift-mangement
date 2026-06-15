@@ -286,6 +286,7 @@ function ShiftsTab({ initialDate }: { initialDate?: string | null }) {
     const [shifts, setShifts] = useState<any[]>([]);
     const [members, setMembers] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
+    const [dragOverShiftId, setDragOverShiftId] = useState<number | null>(null);
 
     useEffect(() => {
         api.get('/users').then(res => setMembers(res.data));
@@ -316,6 +317,20 @@ function ShiftsTab({ initialDate }: { initialDate?: string | null }) {
             api.get(`/shifts/week?start=${selectedDate}`).then(res => setShifts(res.data.filter((s: any) => s.date === selectedDate)));
         } catch (error: any) {
             toast.error(error.response?.data?.detail || 'Failed to remove');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleMove = async (sourceShiftId: number, targetShiftId: number, userId: number) => {
+        setLoading(true);
+        try {
+            await api.delete(`/shifts/${sourceShiftId}/assign/${userId}`);
+            await api.post(`/shifts/${targetShiftId}/assign?user_id=${userId}`);
+            toast.success('Moved successfully');
+            api.get(`/shifts/week?start=${selectedDate}`).then(res => setShifts(res.data.filter((s: any) => s.date === selectedDate)));
+        } catch (error: any) {
+            toast.error(error.response?.data?.detail || 'Failed to move');
         } finally {
             setLoading(false);
         }
@@ -375,7 +390,14 @@ function ShiftsTab({ initialDate }: { initialDate?: string | null }) {
                     <h3 className="font-space font-bold mb-4">Available Members</h3>
                     <div className="space-y-2">
                         {members.map(m => (
-                            <div key={m.id} className="flex items-center gap-3 p-2 rounded-lg bg-slate-900/50 border border-slate-700">
+                            <div 
+                                key={m.id} 
+                                draggable
+                                onDragStart={(e) => {
+                                    e.dataTransfer.setData('userId', m.id.toString());
+                                }}
+                                className="flex items-center gap-3 p-2 rounded-lg bg-slate-900/50 border border-slate-700 cursor-grab active:cursor-grabbing hover:bg-slate-800 transition-colors"
+                            >
                                 <MemberAvatar index={m.avatar_index} name={m.name} size="sm" />
                                 <span className="text-sm font-medium">{m.name}</span>
                             </div>
@@ -401,9 +423,50 @@ function ShiftsTab({ initialDate }: { initialDate?: string | null }) {
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap gap-4 mb-6 min-h-[60px] p-4 bg-slate-900/50 rounded-xl border border-slate-700 border-dashed items-center">
+                            <div 
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    if (shift) setDragOverShiftId(shift.id);
+                                }}
+                                onDragLeave={() => setDragOverShiftId(null)}
+                                onDrop={(e) => {
+                                    e.preventDefault();
+                                    setDragOverShiftId(null);
+                                    if (!shift) return;
+                                    
+                                    const userId = e.dataTransfer.getData('userId');
+                                    const sourceShiftId = e.dataTransfer.getData('sourceShiftId');
+                                    
+                                    if (!userId) return;
+
+                                    if (count >= 3) {
+                                        toast.error('Shift is full');
+                                        return;
+                                    }
+
+                                    if (shift.assignments?.find((a: any) => a.user.id.toString() === userId)) {
+                                        toast.error('Member already in this shift');
+                                        return;
+                                    }
+
+                                    if (sourceShiftId && sourceShiftId !== shift.id.toString()) {
+                                        handleMove(parseInt(sourceShiftId), shift.id, parseInt(userId));
+                                    } else if (!sourceShiftId) {
+                                        handleAssign(shift.id, parseInt(userId));
+                                    }
+                                }}
+                                className={`flex flex-wrap gap-4 mb-6 min-h-[60px] p-4 bg-slate-900/50 rounded-xl border border-dashed items-center transition-colors ${dragOverShiftId === shift?.id ? 'border-indigo-500 bg-indigo-500/10' : 'border-slate-700'}`}
+                            >
                                 {shift?.assignments?.map((a: any) => (
-                                    <div key={a.id} className="relative group flex flex-col items-center gap-1">
+                                    <div 
+                                        key={a.id} 
+                                        draggable
+                                        onDragStart={(e) => {
+                                            e.dataTransfer.setData('userId', a.user.id.toString());
+                                            e.dataTransfer.setData('sourceShiftId', shift.id.toString());
+                                        }}
+                                        className="relative group flex flex-col items-center gap-1 cursor-grab active:cursor-grabbing"
+                                    >
                                         <MemberAvatar index={a.user.avatar_index} name={a.user.name} size="md" />
                                         <span className="text-xs text-slate-400">{a.user.name}</span>
                                         <button 
